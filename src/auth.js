@@ -13,7 +13,10 @@
  */
 import md5 from 'md5';
 
-function validatePassword(inputPassword, encryptedPassword) {
+function validatePassword(inputPassword, encryptedPassword, inputUser, authUsers) {
+    if(authUsers && authUsers.indexOf(inputUser) < 0) {
+        return false;
+    }
     var inputPasswordHash = sha256(inputPassword);
     if (window.$docsify.auth.use == "md5") {
         inputPasswordHash = md5(inputPassword);
@@ -29,7 +32,7 @@ function injectStyle() {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 250px;
+        height: 360px;
         width: 400px;
         border: 1px solid #eee;
         margin: 0 auto;
@@ -41,8 +44,16 @@ function injectStyle() {
         font-size: 16px;
       }
       #auth-dialog button {
-        padding: 10px 20px;
+        padding: 5px 10px;
         font-size: 16px;
+        height: 40px;
+        width: 90px;
+        background: #168fff;
+        color: white;
+        border: none;
+      }
+      #auth-dialog button:hover {
+        background: #40a9ff
       }
       #auth-dialog error-message {
         color: red;
@@ -66,8 +77,11 @@ function injectAuthDialog() {
     divEl.id = "auth-dialog";
     divEl.style.display = "none";
     divEl.innerHTML = `
-        <span style="font-size:22px;font-weight:blod;">${auth.title}</span>
-        <input type="password" id="auth-pwd" placeholder="Password">
+        <div><img src="${auth.logo}" style="width:150px;margin-bottom:10px;"/></div>
+        <div style="font-size:22px;font-weight:blod;">${auth.title}</div>
+        <div><input type="text" id="auth-user" placeholder="User"></div>
+        <div><input type="password" id="auth-pwd" placeholder="Password"></div>
+        
         <button onclick="checkPassword()">提交</button>
         <p id="error-message" style="color: red; display: none;">密码错误，无法访问。</p>
     `;
@@ -81,14 +95,18 @@ function setAuthDialog(isShow) {
             document.getElementsByClassName('github-corner')[0].style.display='none';
         }
         document.getElementsByTagName('main')[0].style.display='none';
-        document.getElementsByTagName('nav')[0].style.display='none';
+        if (document.getElementsByTagName('nav')[0]) {
+            document.getElementsByTagName('nav')[0].style.display='none';
+        }
     } else {
         document.getElementById('auth-dialog').style.display = 'none';
         if (document.getElementsByClassName('github-corner')[0]) {
             document.getElementsByClassName('github-corner')[0].style.display='block';
         }
         document.getElementsByTagName('main')[0].style.display='block';
-        document.getElementsByTagName('nav')[0].style.display='block';
+        if (document.getElementsByTagName('nav')[0]) {
+            document.getElementsByTagName('nav')[0].style.display='block';
+        }
     }
 }
 
@@ -118,12 +136,19 @@ export function install (hook, vm) {
                 break;
             }
         }
+        console.log("needAuth: ", auth, needAuth, !sessionStorage.getItem('authenticated'))
         // 是否开启认证，且需要认证，且还没有认证过
-        if (auth.enable && needAuth && !sessionStorage.getItem('authenticated')) {
+        let sha_user = sessionStorage.getItem('authenticated.user') ? sha256(sessionStorage.getItem('authenticated.user')) : '';
+        let sha_pasd = sessionStorage.getItem('authenticated.password');
+        let is_authenticated = sessionStorage.getItem('authenticated') && (sha_user && sha_user === sha_pasd);
+        if (auth.enable && needAuth && !is_authenticated) {
             setAuthDialog(true);
             window.checkPassword = function() {
                 let pwd = document.getElementById("auth-pwd").value;
-                if (validatePassword(pwd, window.$docsify.auth.password)) {
+                let user = document.getElementById("auth-user").value;
+                if (validatePassword(pwd, window.$docsify.auth.password, user, window.$docsify.auth.users)) {
+                    sessionStorage.setItem('authenticated.user', user);
+                    sessionStorage.setItem('authenticated.password', sha256(user));
                     sessionStorage.setItem('authenticated', 'true');
                     setAuthDialog(false);
                 } else {
