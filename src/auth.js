@@ -138,7 +138,7 @@ export function install (hook, vm) {
         }
         console.log("needAuth: ", auth, needAuth, !sessionStorage.getItem('authenticated'))
         // 是否开启认证，且需要认证，且还没有认证过
-        let sha_user = sessionStorage.getItem('authenticated.user') ? sha256(sessionStorage.getItem('authenticated.user')) : '';
+        let sha_user = sessionStorage.getItem('authenticated.user') ? sha256(sessionStorage.getItem('authenticated.user') + window.$docsify.auth.password) : '';
         let sha_pasd = sessionStorage.getItem('authenticated.password');
         let is_authenticated = sessionStorage.getItem('authenticated') && (sha_user && sha_user === sha_pasd);
         if (auth.enable && needAuth && !is_authenticated) {
@@ -148,7 +148,7 @@ export function install (hook, vm) {
                 let user = document.getElementById("auth-user").value;
                 if (validatePassword(pwd, window.$docsify.auth.password, user, window.$docsify.auth.users)) {
                     sessionStorage.setItem('authenticated.user', user);
-                    sessionStorage.setItem('authenticated.password', sha256(user));
+                    sessionStorage.setItem('authenticated.password', sha256(user + window.$docsify.auth.password));
                     sessionStorage.setItem('authenticated', 'true');
                     setAuthDialog(false);
                 } else {
