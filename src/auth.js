@@ -88,7 +88,7 @@ function injectAuthDialog() {
     document.getElementsByTagName("body")[0].appendChild(divEl);
 }
 
-function setAuthDialog(isShow) {
+function setAuthDialog(isShow, reloadPage) {
     if (isShow) {
         document.getElementById('auth-dialog').style.display = 'flex';
         if (document.getElementsByClassName('github-corner')[0]) {
@@ -106,6 +106,11 @@ function setAuthDialog(isShow) {
         document.getElementsByTagName('main')[0].style.display='block';
         if (document.getElementsByTagName('nav')[0]) {
             document.getElementsByTagName('nav')[0].style.display='block';
+        }
+        if(reloadPage) {
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
     }
 }
@@ -150,12 +155,12 @@ export function install (hook, vm) {
                     sessionStorage.setItem('authenticated.user', user);
                     sessionStorage.setItem('authenticated.password', sha256(user + window.$docsify.auth.password));
                     sessionStorage.setItem('authenticated', 'true');
-                    setAuthDialog(false);
+                    setAuthDialog(false, true);
                 } else {
                     document.getElementById('error-message').style.display = 'block';
                 }
             }
-            return '<div style="color:red;">第一次认证成功后，请重新刷新即可查看内容！</div>';
+            return '<div style="color:red;">认证成功, 页面1S后将刷新加载，若未跳转，请手动刷新访问！</div>';
         } else {
             setAuthDialog(false);
             return content;  // 返回原始内容
