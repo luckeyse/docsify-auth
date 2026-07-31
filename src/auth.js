@@ -129,7 +129,6 @@ export function install (hook, vm) {
         if (rm == "history") {
             currentPath = window.location.hash.split('?')[0].split('#')[0] || '/';
         }
-        console.info("currentPath:" + currentPath);
         var needAuth = null;
         let auth = window.$docsify.auth;
         let paths = auth.paths;
@@ -141,7 +140,6 @@ export function install (hook, vm) {
                 break;
             }
         }
-        console.log("needAuth: ", auth, needAuth, !sessionStorage.getItem('authenticated'))
         // 是否开启认证，且需要认证，且还没有认证过
         let sha_user = sessionStorage.getItem('authenticated.user') ? sha256(sessionStorage.getItem('authenticated.user') + window.$docsify.auth.password) : '';
         let sha_pasd = sessionStorage.getItem('authenticated.password');
