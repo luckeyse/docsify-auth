@@ -79,8 +79,8 @@ function injectAuthDialog() {
     divEl.innerHTML = `
         <div><img src="${auth.logo}" style="width:150px;margin-bottom:10px;"/></div>
         <div style="font-size:22px;font-weight:blod;">${auth.title}</div>
-        <div><input type="text" id="auth-user" placeholder="User"></div>
-        <div><input type="password" id="auth-pwd" placeholder="Password" onkeydown="(event.keyCode === 13 || event.key === 'Enter') && checkPassword()"></div>
+        <div><input type="text" id="auth-user" placeholder="User" autocomplete="username"></div>
+        <div><input type="password" id="auth-pwd" placeholder="Password" autocomplete="current-password" onkeydown="(event.keyCode === 13 || event.key === 'Enter') && checkPassword()"></div>
         
         <button onclick="checkPassword()">提交</button>
         <p id="error-message" style="color: red; display: none;">密码错误，无法访问。</p>
